@@ -3,6 +3,7 @@ package users
 import (
 	"fmt"
 
+	dateutils "github.com/tars-iot/users-api/utils/date-utils"
 	"github.com/tars-iot/users-api/utils/errors"
 )
 
@@ -19,6 +20,7 @@ func (user *User) Save() *errors.RestErr {
 		}
 		return errors.ConflictErr(fmt.Sprintf("User: %d already exist", user.ID))
 	}
+	user.DateCreated = dateutils.GetNowString()
 	userDB[user.ID] = user
 	return nil
 }
