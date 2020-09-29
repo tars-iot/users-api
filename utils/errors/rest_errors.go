@@ -29,11 +29,20 @@ func NotFoundErr(message string) *RestErr {
 	}
 }
 
-// AlreadyExistErr is fucntion to return BAD_REQUEST response
+// ConflictErr is fucntion to return BAD_REQUEST response
 func ConflictErr(message string) *RestErr {
 	return &RestErr{
 		Message:    message,
 		StatusCode: http.StatusConflict,
 		Error:      "CONFLICT",
+	}
+}
+
+// InternalServerErr is fucntion to return BAD_REQUEST response
+func InternalServerErr(message string) *RestErr {
+	return &RestErr{
+		Message:    message,
+		StatusCode: http.StatusInternalServerError,
+		Error:      "INTERNAL_SERVER_ERROR",
 	}
 }
