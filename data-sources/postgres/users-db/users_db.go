@@ -4,26 +4,29 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
 	_ "github.com/lib/pq" // github.com/lib/pq is postgres package
 )
 
-const (
-	postgresUsersdbUsername = "postgresUsersdbUsername"
-	postgresUsersdbPassword = "postgresUsersdbPassword"
-	postgresUsersdbHost     = "postgresUsersdbHost"
-	postgresUsersdbSchema   = "postgresUsersdbSchema"
-)
+// const (
+// 	postgresUsersdbUsername = "postgresUsersdbUsername"
+// 	postgresUsersdbPassword = "postgresUsersdbPassword"
+// 	postgresUsersdbHost     = "postgresUsersdbHost"
+// 	postgresUsersdbSchema   = "postgresUsersdbSchema"
+// )
 
 //Client is sql sql connection string
 var (
 	Client *sql.DB
 
-	username = os.Getenv("postgresUsersdbUsername")
-	password = os.Getenv("postgresUsersdbPassword")
-	host     = os.Getenv("postgresUsersdbHost")
-	schema   = os.Getenv("postgresUsersdbSchema")
+	// username = os.Getenv("postgresUsersdbUsername")
+	// password = os.Getenv("postgresUsersdbPassword")
+	// host     = os.Getenv("postgresUsersdbHost")
+	// schema   = os.Getenv("postgresUsersdbSchema")
+	username = "tarsiot"
+	password = "tarsiot"
+	host     = "localhost"
+	schema   = "users_db"
 )
 
 func init() {

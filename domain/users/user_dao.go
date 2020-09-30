@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	queryInsertUser = `INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)`
+	queryInsertUser = `INSERT INTO users (first_name, last_name, email, date_created) VALUES ($1, $2, $3, $4) RETURNING id`
 )
 
 var (
