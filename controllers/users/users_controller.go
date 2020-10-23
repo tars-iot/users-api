@@ -47,5 +47,5 @@ func GetUser(c *gin.Context) {
 		c.JSON(getErr.StatusCode, getErr)
 		return
 	}
-	c.JSON(http.StatusCreated, result)
+	c.JSON(http.StatusOK, result)
 }

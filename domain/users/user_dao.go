@@ -1,25 +1,25 @@
 package users
 
 import (
-	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 
-	usersdb "github.com/tars-iot/users-api/data-sources/postgres/users-db"
-
+	usersdb "github.com/tars-iot/users-api/data-sources/mysql/users_db"
 	dateutils "github.com/tars-iot/users-api/utils/date-utils"
+	mysqlutils "github.com/tars-iot/users-api/utils/mysql_utils"
+
 	"github.com/tars-iot/users-api/utils/errors"
 )
 
 const (
-	queryInsertUser = `INSERT INTO users (first_name, last_name, email, date_created) VALUES ($1, $2, $3, $4) RETURNING id`
-)
-
-var (
-	userDB = make(map[int64]*User)
+	queryInsertUser = `INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)`
+	queryGetUser    = `SELECT id, first_name, last_name, email, date_created from users WHERE id=?`
 )
 
 // Save is the function to store data in database
 func (user *User) Save() *errors.RestErr {
-	result := userDB[user.ID]
+	if err := usersdb.Client.Ping(); err != nil {
+		panic(err)
+	}
 	user.DateCreated = dateutils.GetNowString()
 	stmt, err := usersdb.Client.Prepare(queryInsertUser)
 	if err != nil {
@@ -27,25 +27,17 @@ func (user *User) Save() *errors.RestErr {
 	}
 	defer stmt.Close()
 
-	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
-	if err != nil {
-		return errors.InternalServerErr(err.Error())
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if saveErr != nil {
+		return mysqlutils.ParseError(saveErr)
 	}
 
 	userID, err := insertResult.LastInsertId()
 	if err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
-
 	user.ID = userID
-	if result != nil {
-		if result.Email == user.Email {
-			return errors.ConflictErr(fmt.Sprintf("Email: %s already exist", user.Email))
-		}
-		return errors.ConflictErr(fmt.Sprintf("User: %d already exist", user.ID))
-	}
 
-	userDB[user.ID] = user
 	return nil
 }
 
@@ -55,17 +47,27 @@ func (user *User) Get() *errors.RestErr {
 	if err := usersdb.Client.Ping(); err != nil {
 		panic(err)
 	}
-
-	result := userDB[user.ID]
-	if result == nil {
-		return errors.NotFoundErr(fmt.Sprintf("User %d not found", user.ID))
+	stmt, err := usersdb.Client.Prepare(queryGetUser)
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
 	}
+	defer stmt.Close()
 
-	user.ID = result.ID
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DateCreated = result.DateCreated
-
+	result := stmt.QueryRow(user.ID)
+	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
+		return mysqlutils.ParseError(getErr)
+	}
 	return nil
 }
+
+//SQL QUERY:
+//	CREATE TABLE:
+//		CREATE TABLE `users` (
+//		`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+//		`first_name` VARCHAR(20) DEFAULT NULL,
+//		`last_name` VARCHAR(20) DEFAULT NULL,
+//		`email` VARCHAR(40),
+//		`date_created` VARCHAR(20) DEFAULT NULL,
+//		UNIQUE KEY `email_UNIQUE` (`email`) USING HASH,
+//		PRIMARY KEY (`id`)
+//		);
