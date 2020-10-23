@@ -13,6 +13,7 @@ import (
 const (
 	queryInsertUser = `INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)`
 	queryGetUser    = `SELECT id, first_name, last_name, email, date_created from users WHERE id=?`
+	queryUpdateUser = `UPDATE users SET first_name=? ,last_name=? ,email=? WHERE id=?`
 )
 
 // Save is the function to store data in database
@@ -56,6 +57,21 @@ func (user *User) Get() *errors.RestErr {
 	result := stmt.QueryRow(user.ID)
 	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
 		return mysqlutils.ParseError(getErr)
+	}
+	return nil
+}
+
+func (user *User) Update() *errors.RestErr {
+	if err := usersdb.Client.Ping(); err != nil {
+		panic(err)
+	}
+	stmt, err := usersdb.Client.Prepare(queryUpdateUser)
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
+	}
+	_, updateErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if updateErr != nil {
+		return mysqlutils.ParseError(updateErr)
 	}
 	return nil
 }
