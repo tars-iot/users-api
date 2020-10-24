@@ -1,17 +1,18 @@
-package users_db
+package usersdb
 
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 //TODO: Add to OS.Env group for production
 const (
 	mysqlUsersUsername = "root"
-	mysqlUsersPassword = "my-super-secret-password"
-	mysqlUsersHost     = "10.32.131.35:31136"
+	mysqlUsersPassword = "tars-iot-database"
+	mysqlUsersHost     = "192.168.49.2:30423"
 	mysqlUsersSchema   = "users_db"
 )
 
