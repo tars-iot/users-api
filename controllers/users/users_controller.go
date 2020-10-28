@@ -11,8 +11,18 @@ import (
 	"github.com/tars-iot/users-api/utils/errors"
 )
 
-// CreateUser is Handler to create new entry of user in database
-func CreateUser(c *gin.Context) {
+func getUserID(userIDParam string) (int64, *errors.RestErr) {
+	userID, usrErr := strconv.ParseInt(userIDParam, 10, 64)
+
+	if usrErr != nil {
+		return 0, errors.NotFoundErr("Invalid user ID")
+	}
+	return userID, nil
+
+}
+
+// Create is Handler to create new entry of user in database
+func Create(c *gin.Context) {
 	var user users.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -31,13 +41,12 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-// GetUser is Handler to perform get user details
-func GetUser(c *gin.Context) {
+// Get is Handler to perform get user details
+func Get(c *gin.Context) {
 
-	userID, usrErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if usrErr != nil {
-		err := errors.BadRequestErr("Invalid user ID")
-		c.JSON(err.StatusCode, err)
+	userID, idErr := getUserID(c.Param("user_id"))
+	if idErr != nil {
+		c.JSON(idErr.StatusCode, idErr)
 		return
 	}
 
@@ -50,12 +59,10 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func UpdateUser(c *gin.Context) {
-	userID, usrErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-
-	if usrErr != nil {
-		err := errors.BadRequestErr("Invalid user ID")
-		c.JSON(err.StatusCode, err)
+func Update(c *gin.Context) {
+	userID, idErr := getUserID(c.Param("user_id"))
+	if idErr != nil {
+		c.JSON(idErr.StatusCode, idErr)
 		return
 	}
 
@@ -70,10 +77,26 @@ func UpdateUser(c *gin.Context) {
 
 	user.ID = userID
 
-	result, err := services.UpdateUser(user)
+	isPartial := c.Request.Method == http.MethodPatch
+
+	result, err := services.UpdateUser(isPartial, user)
 	if err != nil {
 		c.JSON(err.StatusCode, err)
 		return
 	}
 	c.JSON(http.StatusOK, result)
+}
+
+func Delete(c *gin.Context) {
+	userID, idErr := getUserID(c.Param("user_id"))
+	if idErr != nil {
+		c.JSON(idErr.StatusCode, idErr)
+		return
+	}
+	err := services.DeleteUser(userID)
+	if err != nil {
+		c.JSON(err.StatusCode, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
 }

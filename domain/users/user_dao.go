@@ -3,7 +3,7 @@ package users
 import (
 	_ "github.com/go-sql-driver/mysql"
 
-	usersdb "github.com/tars-iot/users-api/data-sources/mysql/usersdb"
+	usersdb "github.com/tars-iot/users-api/data-sources/mysql/users_db"
 	dateutils "github.com/tars-iot/users-api/utils/date-utils"
 	mysqlutils "github.com/tars-iot/users-api/utils/mysql_utils"
 
@@ -14,6 +14,7 @@ const (
 	queryInsertUser = `INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)`
 	queryGetUser    = `SELECT id, first_name, last_name, email, date_created from users WHERE id=?`
 	queryUpdateUser = `UPDATE users SET first_name=? ,last_name=? ,email=? WHERE id=?`
+	queryDeleteUser = `DELETE FROM users WHERE id=?`
 )
 
 // Save is the function to store data in database
@@ -69,9 +70,26 @@ func (user *User) Update() *errors.RestErr {
 	if err != nil {
 		return errors.InternalServerErr(err.Error())
 	}
-	_, updateErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	defer stmt.Close()
+	_, updateErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.ID)
 	if updateErr != nil {
 		return mysqlutils.ParseError(updateErr)
+	}
+	return nil
+}
+
+func (user *User) Delete() *errors.RestErr {
+	if err := usersdb.Client.Ping(); err != nil {
+		panic(err)
+	}
+	stmt, err := usersdb.Client.Prepare(queryDeleteUser)
+	if err != nil {
+		return errors.InternalServerErr(err.Error())
+	}
+	defer stmt.Close()
+	_, deleteErr := stmt.Exec(user.ID)
+	if deleteErr != nil {
+		return mysqlutils.ParseError(deleteErr)
 	}
 	return nil
 }
