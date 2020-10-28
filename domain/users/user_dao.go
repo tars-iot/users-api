@@ -1,7 +1,7 @@
 package users
 
 import (
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // mysql driver library
 
 	usersdb "github.com/tars-iot/users-api/data-sources/mysql/users_db"
 	dateutils "github.com/tars-iot/users-api/utils/date-utils"
@@ -62,6 +62,7 @@ func (user *User) Get() *errors.RestErr {
 	return nil
 }
 
+// Update is function to update user to database
 func (user *User) Update() *errors.RestErr {
 	if err := usersdb.Client.Ping(); err != nil {
 		panic(err)
@@ -78,6 +79,7 @@ func (user *User) Update() *errors.RestErr {
 	return nil
 }
 
+// Delete is function to Delete user from database
 func (user *User) Delete() *errors.RestErr {
 	if err := usersdb.Client.Ping(); err != nil {
 		panic(err)

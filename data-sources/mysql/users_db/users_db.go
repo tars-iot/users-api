@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // mysql driver
 )
 
 //TODO: Add to OS.Env group for production
 const (
-	mysqlUsersUsername = "root"
-	mysqlUsersPassword = "tars-iot-database"
-	mysqlUsersHost     = "192.168.49.2:30423"
-	mysqlUsersSchema   = "users_db"
+	mysqlUsersUsername = "uys0w7fpuqdx0u3d"
+	mysqlUsersPassword = "NOu08xSJmJJRnvXkQvzP"
+	mysqlUsersHost     = "bvfmbfrbdycoxsx0ibvv-mysql.services.clever-cloud.com"
+	mysqlUsersSchema   = "bvfmbfrbdycoxsx0ibvv"
 )
 
 var (
