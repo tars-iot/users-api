@@ -17,4 +17,6 @@ func mapUrls() {
 	router.PATCH("tars-iot/v1/users/:user_id", users.Update)
 
 	router.DELETE("tars-iot/v1/users/:user_id", users.Delete)
+
+	router.GET("tars-iot/v1/admin/search", users.Search)
 }

@@ -100,3 +100,16 @@ func Delete(c *gin.Context) {
 	}
 	c.Status(http.StatusNoContent)
 }
+
+// Search is function used to query based on probvided queryu parameter
+func Search(c *gin.Context) {
+	status := c.Query("status")
+
+	users, err := services.Search(status)
+	if err != nil {
+		c.JSON(err.StatusCode, err)
+		return
+	}
+	c.JSON(http.StatusOK, users)
+
+}

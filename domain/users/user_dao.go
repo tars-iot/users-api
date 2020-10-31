@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	queryInsertUser = `INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?)`
-	queryGetUser    = `SELECT id, first_name, last_name, email, date_created from users WHERE id=?`
-	queryUpdateUser = `UPDATE users SET first_name=? ,last_name=? ,email=? WHERE id=?`
-	queryDeleteUser = `DELETE FROM users WHERE id=?`
+	queryInsertUser        = `INSERT INTO users (first_name, last_name, email, date_created, password, status) VALUES (?, ?, ?, ?, ?, ?)`
+	queryGetUser           = `SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?`
+	queryUpdateUser        = `UPDATE users SET first_name=? ,last_name=? ,email=? WHERE id=?`
+	queryDeleteUser        = `DELETE FROM users WHERE id=?`
+	queryFindUsersByStatus = `SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status=?`
 )
 
 // Save is the function to store data in database
@@ -29,7 +30,7 @@ func (user *User) Save() *errors.RestErr {
 	}
 	defer stmt.Close()
 
-	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Password, user.Status)
 	if saveErr != nil {
 		return mysqlutils.ParseError(saveErr)
 	}
@@ -94,6 +95,39 @@ func (user *User) Delete() *errors.RestErr {
 		return mysqlutils.ParseError(deleteErr)
 	}
 	return nil
+}
+
+func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
+	if err := usersdb.Client.Ping(); err != nil {
+		panic(err)
+	}
+	stmt, err := usersdb.Client.Prepare(queryFindUsersByStatus)
+	if err != nil {
+		return nil, errors.InternalServerErr(err.Error())
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(status)
+
+	if err != nil {
+		return nil, errors.InternalServerErr(err.Error())
+	}
+	defer rows.Close()
+
+	results := make([]User, 0)
+
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
+			return nil, mysqlutils.ParseError(err)
+		}
+		results = append(results, user)
+	}
+
+	if len(results) == 0 {
+		return nil, errors.NotFoundErr("No users found matching status")
+	}
+	return results, nil
 }
 
 //SQL QUERY:

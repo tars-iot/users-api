@@ -6,6 +6,10 @@ import (
 	"github.com/tars-iot/users-api/utils/errors"
 )
 
+const (
+	StatusActive = "active"
+)
+
 // User is a structure of user data model
 type User struct {
 	ID          int64  `json:"id"`
@@ -13,6 +17,8 @@ type User struct {
 	LastName    string `json:"last_name"`
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
+	Status      string `json:"status"`
+	Password    string `json:"-"`
 }
 
 // Validate is used to validate manadated data in request
@@ -23,6 +29,11 @@ func (user *User) Validate() *errors.RestErr {
 	}
 	if user.FirstName == "" {
 		return errors.BadRequestErr("Missing manadatory parameter: first_name")
+	}
+
+	user.Password = strings.TrimSpace(user.Password)
+	if user.Password == "" {
+		return errors.BadRequestErr("Invalid password")
 	}
 	return nil
 }
