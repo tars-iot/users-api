@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/tars-iot/users-api/domain/users"
+	"github.com/tars-iot/users-api/utils/crypto-utils"
 	"github.com/tars-iot/users-api/utils/errors"
 )
 
@@ -12,6 +13,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	}
 
 	user.Status = users.StatusActive
+	user.Password = crypto_utils.GetMD5(user.Password)
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
