@@ -16,6 +16,7 @@ const (
 	mysqlUsersSchema   = "bvfmbfrbdycoxsx0ibvv"
 )
 
+// Client is mysql connection handler
 var (
 	Client *sql.DB
 )

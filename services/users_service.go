@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/tars-iot/users-api/domain/users"
-	"github.com/tars-iot/users-api/utils/crypto-utils"
+	crypto_utils "github.com/tars-iot/users-api/utils/crypto-utils"
 	"github.com/tars-iot/users-api/utils/errors"
 )
 
@@ -71,7 +71,7 @@ func DeleteUser(userID int64) *errors.RestErr {
 	return nil
 }
 
-func Search(status string) ([]users.User, *errors.RestErr) {
+func Search(status string) (users.Users, *errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 }

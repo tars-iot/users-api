@@ -12,7 +12,7 @@ import (
 
 const (
 	queryInsertUser        = `INSERT INTO users (first_name, last_name, email, date_created, password, status) VALUES (?, ?, ?, ?, ?, ?)`
-	queryGetUser           = `SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?`
+	queryGetUser           = `SELECT id, first_name, last_name, email, date_created, status FROM users WHERE id=?`
 	queryUpdateUser        = `UPDATE users SET first_name=? ,last_name=? ,email=? WHERE id=?`
 	queryDeleteUser        = `DELETE FROM users WHERE id=?`
 	queryFindUsersByStatus = `SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status=?`
@@ -57,7 +57,7 @@ func (user *User) Get() *errors.RestErr {
 	defer stmt.Close()
 
 	result := stmt.QueryRow(user.ID)
-	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
+	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); getErr != nil {
 		return mysqlutils.ParseError(getErr)
 	}
 	return nil

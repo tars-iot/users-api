@@ -10,6 +10,8 @@ const (
 	StatusActive = "active"
 )
 
+type Users []User
+
 // User is a structure of user data model
 type User struct {
 	ID          int64  `json:"id"`
